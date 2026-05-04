@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #1a1a2e;
+            color: #eee;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        h1 { color: #e63946; font-size: 2.5rem; margin-bottom: 30px; }
+
+        .busca {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            width: 250px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background-color: #e63946;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover { background-color: #c1121f; }
+
+        #card {
+            background-color: #16213e;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            display: none;
+            width: 320px;
+        }
+
+        #card img { width: 180px; }
+        #card h2 { font-size: 1.8rem; text-transform: capitalize; margin: 10px 0; }
+
+        .tipo {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background-color: #e63946;
+            font-size: 0.85rem;
+            margin: 4px;
+        }
+
+        .stats { margin-top: 16px; text-align: left; }
+        .stat-linha { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #2a2a4a; }
+
+        #btn-favoritar { margin-top: 16px; background-color: #f4a261; }
+        #btn-favoritar:hover { background-color: #e76f51; }
+
+        #erro { color: #e63946; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Pokédex</h1>
+
+    <div class="busca">
+        <input type="text" id="input-nome" placeholder="Digite o nome do pokémon..." />
+        <button onclick="buscarPokemon()">Buscar</button>
+    </div>
+
+    <div id="erro"></div>
+
+    <div id="card">
+        <img id="imagem" src="" alt="sprite do pokémon" />
+        <h2 id="nome"></h2>
+        <div id="tipos"></div>
+        <div class="stats" id="stats"></div>
+        <button id="btn-favoritar" onclick="favoritarPokemon()">⭐ Favoritar</button>
+    </div>
+
+    <script>
+        let pokemonAtual = null;
+
+        async function buscarPokemon() {
+            const nome = document.getElementById("input-nome").value.trim().toLowerCase();
+            const erro = document.getElementById("erro");
+            const card = document.getElementById("card");
+
+            erro.textContent = "";
+            card.style.display = "none";
+
+            if (!nome) return;
+
+            const resposta = await fetch(`/pokemon/${nome}`);
+            const dados = await resposta.json();
+
+            if (dados.erro) {
+                erro.textContent = "Pokémon não encontrado.";
+                return;
+            }
+
+            pokemonAtual = dados;
+
+            document.getElementById("imagem").src = dados.imagem;
+            document.getElementById("nome").textContent = dados.nome;
+
+            document.getElementById("tipos").innerHTML = dados.tipos
+                .map(t => `<span class="tipo">${t}</span>`)
+                .join("");
+
+            document.getElementById("stats").innerHTML = Object.entries(dados.stats)
+                .map(([stat, valor]) => `<div class="stat-linha"><span>${stat}</span><span>${valor}</span></div>`)
+                .join("");
+
+            card.style.display = "block";
+        }
+
+        async function favoritarPokemon() {
+            if (!pokemonAtual) return;
+
+            const resposta = await fetch("/favoritos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(pokemonAtual)
+            });
+
+            const dados = await resposta.json();
+            alert(dados.mensagem);
+        }
+
+        document.getElementById("input-nome").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") buscarPokemon();
+        });
+    </script>
+</body>
+</html>

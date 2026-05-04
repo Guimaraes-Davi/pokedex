@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from app.database import db
 from app.pokeapi import buscar_pokemon
 from app.models import Favorito
+from flask import render_template
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pokedex.db"
@@ -55,3 +56,7 @@ def remover_favorito(id):
         db.session.commit()
         return jsonify({"mensagem": f"{favorito.nome} removido dos favoritos!"})
     return jsonify({"erro": "Favorito não encontrado"}), 404
+
+@app.route("/")
+def index():
+    return render_template("index.html")
