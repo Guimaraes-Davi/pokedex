@@ -79,7 +79,8 @@
     <h1>Pokédex</h1>
 
     <div class="busca">
-        <input type="text" id="input-nome" placeholder="Digite o nome do pokémon..." />
+        <input type="text" id="input-nome" placeholder="Digite o nome do pokémon..." list="sugestoes" />
+        <datalist id="sugestoes"></datalist>
         <button onclick="buscarPokemon()">Buscar</button>
         <a href="/favoritos-page"><button>Ver Favoritos</button></a>
     </div>
@@ -96,6 +97,16 @@
 
     <script>
         let pokemonAtual = null;
+
+        async function carregarLista() {
+            const resposta = await fetch("/pokemon-lista");
+            const nomes = await resposta.json();
+            const datalist = document.getElementById("sugestoes");
+
+            datalist.innerHTML = nomes.map(n => `<option value="${n}">`).join("");
+        }   
+
+        carregarLista();
 
         async function buscarPokemon() {
             const nome = document.getElementById("input-nome").value.trim().toLowerCase();

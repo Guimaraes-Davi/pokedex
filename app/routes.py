@@ -3,6 +3,7 @@ from app.database import db
 from app.pokeapi import buscar_pokemon
 from app.models import Favorito
 from flask import render_template
+import requests
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pokedex.db"
@@ -69,3 +70,14 @@ def index():
 @app.route("/favoritos-page")
 def favoritos_page():
     return render_template("favoritos.html")
+
+_cache_lista = None
+
+@app.route("/pokemon-lista")
+def lista_pokemons():
+    global _cache_lista
+    if _cache_lista is None:
+        resposta = requests.get("https://pokeapi.co/api/v2/pokemon?limit=1025")
+        dados = resposta.json()
+        _cache_lista = [p["name"] for p in dados["results"]]
+    return jsonify(_cache_lista)
