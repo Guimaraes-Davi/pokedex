@@ -1,6 +1,16 @@
 import requests
 
 def buscar_pokemon(nome):
+    """
+    Busca os dados de um pokémon pelo nome na PokeAPI.
+
+    Args:
+        nome (str): Nome do pokémon a ser buscado.
+
+    Returns:
+        dict: Dicionário com nome, id, altura, peso, tipos, stats e imagem.
+        None: Se o pokémon não for encontrado.
+    """
     url = f"https://pokeapi.co/api/v2/pokemon/{nome.lower()}"
     resposta = requests.get(url)
 
