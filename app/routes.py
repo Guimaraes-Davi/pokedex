@@ -23,6 +23,11 @@ def get_pokemon(nome):
 @app.route("/favoritos", methods=["POST"])
 def adicionar_favorito():
     dados = request.get_json()
+
+    ja_existe = Favorito.query.filter_by(pokemon_id=dados["id"]).first()
+    if ja_existe:
+        return jsonify({"mensagem": f"{dados['nome']} já está nos favoritos!"}), 409
+    
     novo = Favorito(
         nome=dados["nome"],
         pokemon_id=dados["id"],
@@ -60,3 +65,7 @@ def remover_favorito(id):
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/favoritos-page")
+def favoritos_page():
+    return render_template("favoritos.html")
